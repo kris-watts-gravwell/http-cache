@@ -296,9 +296,10 @@ func ClientWithExpiresHeader() ClientOption {
 
 type responseWriter struct {
 	http.ResponseWriter
-	header     http.Header
-	statusCode int
-	body       []byte
+	header      http.Header
+	statusCode  int
+	body        []byte
+	wroteHeader bool
 }
 
 func (w *responseWriter) WriteHeader(statusCode int) {
@@ -314,6 +315,11 @@ func (w *responseWriter) Write(b []byte) (int, error) {
 }
 
 func (w *responseWriter) writeHeader() {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
+
 	for k, v := range w.Header() {
 		for _, vv := range v {
 			w.ResponseWriter.Header().Set(k, vv)
